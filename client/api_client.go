@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,8 +9,8 @@ import (
 	"github.com/wh1plash/API/model"
 )
 
-func FetchUser(ctx context.Context, url string) ([]model.User, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+func FetchUser(url string) ([]model.User, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -23,12 +23,13 @@ func main() {
 	flag.Parse()
 
 	ctx := context.Background()
-	users, err := client.FetchUser(ctx, *src)
+	users, err := client.FetchUser(*src)
 	if err != nil {
 		log.Fatalf("Failed to fetch users: %v", err)
 	}
 
 	fmt.Println(users)
+	_ = ctx
 	_ = dest
 }
 
