@@ -1,0 +1,2 @@
+{"level":"error","error":"open .env: no such file or directory","time":"2025-05-29T18:33:47+03:00","message":"Error loading .env file."}
+{"level":"info","time":"2025-05-29T18:33:47+03:00","message":"Started"}

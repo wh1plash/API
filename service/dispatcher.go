@@ -21,8 +21,6 @@ func DispatchUsers(ctx context.Context, client client.UserClient, delay time.Dur
 		if strings.HasSuffix(user.Email, ".biz") {
 			if err := postWithRetry(ctx, client, user, delay, cnt); err != nil {
 				log.Printf("Failed to send user %s: %v", user.Email, err)
-			} else {
-				log.Printf("Sent user %s", user.Email)
 			}
 		} else {
 			log.Printf("Skipping user %s", user.Email)
