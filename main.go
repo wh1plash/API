@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/wh1plash/API/client"
+	"github.com/wh1plash/API/service"
 )
 
 func init() {
@@ -17,20 +18,30 @@ func init() {
 
 func main() {
 	var (
-		src  = flag.String("A", GetUrl(), "API A")
-		dest = flag.String("B", PostUrl(), "API B")
+		cnt  int
+		apiA = flag.String("ApiA", os.Getenv("GET_URL"), "API A")
+		apiB = flag.String("ApiB", os.Getenv("POST_URL"), "API B")
 	)
 	flag.Parse()
 
-	ctx := context.Background()
-	users, err := client.FetchUser(*src)
+	retryDelayStr := os.Getenv("RETRY_DELAY")
+	if retryDelayStr == "" {
+		retryDelayStr = "2s"
+	}
+	retryDelay, err := time.ParseDuration(retryDelayStr)
 	if err != nil {
-		log.Fatalf("Failed to fetch users: %v", err)
+		log.Fatalf("Invalid delay value: %v", err)
 	}
 
-	fmt.Println(users)
-	_ = ctx
-	_ = dest
+	retryCnt := os.Getenv("RETRY_CNT")
+	if retryCnt == "" {
+		cnt = 3
+	}
+
+	client := client.NewAPIClient(*apiA, *apiB)
+
+	ctx := context.Background()
+	service.DispatchUsers(ctx, client, retryDelay, cnt)
 }
 
 func mustLoadEnvVariables() {
@@ -38,12 +49,4 @@ func mustLoadEnvVariables() {
 	if err != nil {
 		log.Print("Error loading .env file")
 	}
-}
-
-func GetUrl() string {
-	return os.Getenv("GET_URL")
-}
-
-func PostUrl() string {
-	return os.Getenv("POST_URL")
 }

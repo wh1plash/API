@@ -1,64 +1,43 @@
 package service
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/wh1plash/API/client"
 	"github.com/wh1plash/API/model"
 )
 
-func DispatchUsers(ctx context.Context, users []model.User, postURL string) {
+func DispatchUsers(ctx context.Context, client client.UserClient, delay time.Duration, cnt int) {
+	users, err := client.GetUsers(ctx)
+	if err != nil {
+		log.Fatalf("Failed to get users: %v", err)
+	}
+
 	for _, user := range users {
 		if strings.HasSuffix(user.Email, ".biz") {
-			if err := postWithRetry(ctx, postURL, user); err != nil {
-				log.Printf("Failed to send user %s after retries: %v\n", user.Email, err)
+			if err := postWithRetry(ctx, client, user, delay, cnt); err != nil {
+				log.Printf("Failed to send user %s: %v", user.Email, err)
 			} else {
-				log.Printf("Sending user %s to API B", user.Name)
+				log.Printf("Sent user %s", user.Email)
 			}
-			log.Printf("Skipping user %s (not .biz)", user.Email)
+		} else {
+			log.Printf("Skipping user %s", user.Email)
 		}
-
 	}
 }
 
-func postWithRetry(ctx context.Context, url string, user model.User) error {
-	body := map[string]string{
-		"name":  user.Name,
-		"email": user.Email,
-	}
-	data, _ := json.Marshal(body)
-
-	for i := 1; i <= 3; i++ {
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(data))
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := http.DefaultClient.Do(req)
-		if err == nil && resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			resp.Body.Close()
+func postWithRetry(ctx context.Context, client client.UserClient, user model.User, delay time.Duration, cnt int) error {
+	for i := range cnt {
+		err := client.PostUser(ctx, user)
+		if err == nil {
 			return nil
 		}
-		if resp != nil {
-			resp.Body.Close()
-		}
-		log.Printf("Retry %d for user %s\n", i, user.Email)
-		delayStr := os.Getenv("RETRY_DELAY")
-		if delayStr == "" {
-			delayStr = "1s" // default
-		}
-		delay, _ := time.ParseDuration(os.Getenv("DELAY"))
-
-		time.Sleep(time.Second * delay)
+		log.Printf("Retry %d for user %s", i+1, user.Email)
+		time.Sleep(delay)
 	}
 	return fmt.Errorf("max retries exceeded for user %s", user.Email)
-
 }

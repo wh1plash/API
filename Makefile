@@ -4,4 +4,7 @@ build:
 run: build
 	@./bin/app $(ARGS)
 
+test:
+	@go test -v ./...
+
 .PHONY: build
