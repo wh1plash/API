@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -18,11 +17,8 @@ func init() {
 }
 
 func main() {
-	var (
-		apiA = flag.String("ApiA", GetVal("GET_URL"), "API A")
-		apiB = flag.String("ApiB", GetVal("POST_URL"), "API B")
-	)
-	flag.Parse()
+	apiA := GetVal("GET_URL")
+	apiB := GetVal("POST_URL")
 
 	retryDelayStr := GetVal("RETRY_DELAY")
 	retryDelay, err := time.ParseDuration(retryDelayStr)
@@ -42,7 +38,7 @@ func main() {
 		log.Fatal("error to get value for variable", err)
 	}
 
-	client := client.NewAPIClient(*apiA, *apiB)
+	client := client.NewAPIClient(apiA, apiB)
 
 	service.DispatchUsers(client, retryDelay, retryCount, timeout)
 }
