@@ -1,15 +1,15 @@
 # Data Enricher & Dispatcher
 
 ## Test assignment
-this test task demonstrates the work of the service to receive a list of users from the API A service and send data to API B under certain conditions.
+This test task demonstrates the work of the service to receive a list of users from the API A service and send data to API B under certain conditions.
 Condition: 
 1. If the user's email ends with ".biz" - send to API B.
 2. If the POST request is unsuccessful - make 3 attempts with an interval.
 
 The full description of the task is contained in "description.txt"
 
-Parameters can be set in the env file.
-If parameters are not specified or env file is missing, values ​​will be set by default
+Parameters can be set in the .env file.
+If parameters are not specified or .env file is missing, values ​​will be set by default
 ### Example of .env file
 ```
 GET_URL="https://jsonplaceholder.typicode.com/users"
@@ -19,7 +19,7 @@ RETRY_CNT=3
 POST_TIMEOUT=110ms
 ```
 ### To work with the program, you can use commands from Makefile.
-Run app
+run app
 ```
 make run
 ```
