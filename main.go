@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -37,10 +36,15 @@ func main() {
 		log.Fatal("error to get value for variable", err)
 	}
 
+	timeoutStr := GetVal("POST_TIMEOUT")
+	timeout, err := time.ParseDuration(timeoutStr)
+	if err != nil {
+		log.Fatal("error to get value for variable", err)
+	}
+
 	client := client.NewAPIClient(*apiA, *apiB)
 
-	ctx := context.Background()
-	service.DispatchUsers(ctx, client, retryDelay, retryCount)
+	service.DispatchUsers(client, retryDelay, retryCount, timeout)
 }
 
 func mustLoadEnvVariables() {
@@ -61,6 +65,8 @@ func GetVal(s string) string {
 			return "https://webhook.site"
 		case "RETRY_CNT":
 			return "3"
+		case "POST_TIMEOUT":
+			return "100ms"
 		}
 	}
 	return os.Getenv(s)

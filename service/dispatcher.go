@@ -11,15 +11,19 @@ import (
 	"github.com/wh1plash/API/model"
 )
 
-func DispatchUsers(ctx context.Context, client client.UserClient, delay time.Duration, cnt int) {
+func DispatchUsers(client client.UserClient, delay time.Duration, cnt int, timeout time.Duration) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+
 	users, err := client.GetUsers(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get users: %v", err)
+		return
 	}
+	cancel()
 
 	for _, user := range users {
 		if strings.HasSuffix(user.Email, ".biz") {
-			if err := postWithRetry(ctx, client, user, delay, cnt); err != nil {
+			if err := postWithRetry(client, user, delay, cnt, timeout); err != nil {
 				log.Printf("Failed to send user %s: %v", user.Email, err)
 			}
 		} else {
@@ -28,8 +32,10 @@ func DispatchUsers(ctx context.Context, client client.UserClient, delay time.Dur
 	}
 }
 
-func postWithRetry(ctx context.Context, client client.UserClient, user model.User, delay time.Duration, cnt int) error {
+func postWithRetry(client client.UserClient, user model.User, delay time.Duration, cnt int, timeout time.Duration) error {
 	for i := range cnt {
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
 		err := client.PostUser(ctx, user)
 		if err == nil {
 			return nil

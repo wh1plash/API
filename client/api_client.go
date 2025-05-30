@@ -41,7 +41,6 @@ func (c *APIClient) GetUsers(ctx context.Context) ([]model.User, error) {
 		c.logger.Error().Err(err).Str("url", c.apiA).Msg("Failed to create GET request")
 		return nil, err
 	}
-
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		c.logger.Error().Err(err).Str("url", c.apiA).Dur("duration", time.Since(start)).Msg("GET request failed")
@@ -59,8 +58,9 @@ func (c *APIClient) GetUsers(ctx context.Context) ([]model.User, error) {
 		c.logger.Error().Err(err).Msg("Failed to decode user response")
 		return nil, err
 	}
-	c.logger.Info().Msg(fmt.Sprintf("Successfully getting %d users", len(users)))
+	c.logger.Info().Dur("duration", time.Since(start)).Msg(fmt.Sprintf("Successfully getting %d users", len(users)))
 	return users, nil
+
 }
 
 func (c *APIClient) PostUser(ctx context.Context, user model.User) error {
@@ -104,6 +104,7 @@ func (c *APIClient) PostUser(ctx context.Context, user model.User) error {
 		resp.Body.Close()
 	}
 	return nil
+
 }
 
 func InitLogger(logFile string) zerolog.Logger {

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -18,8 +17,7 @@ func TestEmail(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	DispatchUsers(ctx, mock, 0, 3)
+	DispatchUsers(mock, 0, 3, 0)
 
 	expectedEmails := []string{"alice@corp.biz", "eve@evil.biz"}
 
@@ -42,8 +40,7 @@ func TestRetriesWithSuccess(t *testing.T) {
 		PostFailCount: 3,
 	}
 
-	ctx := context.Background()
-	DispatchUsers(ctx, mock, 1*time.Second, 4)
+	DispatchUsers(mock, 1*time.Second, 4, 0)
 
 	if len(mock.PostedUsers) != 1 {
 		t.Fatalf("expected 1 posted user, got %d", len(mock.PostedUsers))
